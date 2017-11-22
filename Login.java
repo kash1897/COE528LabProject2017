@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.io.*;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -133,6 +134,7 @@ public class Login {
                                 catch(IOException ioe) {
                                     ioe.printStackTrace();
                                 }
+                                System.out.println("\nUser has been added");
                             }
                             else{
                                 System.out.println("\nUsername already exists.\nPlease try again.\n");
@@ -191,20 +193,31 @@ public class Login {
             }
             
             if(access.equals("User") || access.equals("user")){
-                System.out.println("Select:\n1. Encryption\n2. Decryption\n3. Backup");
-                String uc = sc.nextLine();
+                do{
+                    System.out.println("Select:\n1. Encryption\n2. Decryption\n3. Backup\n4. Logout");
+                    String uc = sc.nextLine();
                 
-                if(uc.equals("1")){
+                    if(uc.equals("1")){
                     
-                }
+                    }
                 
-                if(uc.equals("2")){
+                    if(uc.equals("2")){
                     
-                }
+                    }
                 
-                if(uc.equals("3")){
-                    
+                    if(uc.equals("3")){
+                        System.out.println("\nBackup Facility.\nPlease enter the path, name, and extension of the file you wish to backup.");
+                        String f = sc.nextLine();
+                        Backup sign = new Backup();
+                        sign.backupAlgorithm(f);
+                    }
+                
+                   if(uc.equals("4")){
+                       logout = true;
+                       System.out.println("\nLogout successful.");
+                   }
                 }
+                while(logout !=true);  
             }
             
             System.out.println("\n");
