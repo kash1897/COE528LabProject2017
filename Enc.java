@@ -23,14 +23,15 @@ import java.util.ArrayList;
  * @author Kobikan2
  */
 public class Enc {
-            ArrayList <Integer> arrd=new ArrayList<>();
-        ArrayList <Integer> primearr=new ArrayList<>();
-        ArrayList <Integer> eparr=new ArrayList<>(); 
+    private String user;
+    public Enc(String user){
+        this.user=user;
+    }
+
     public void ModE(String bfrenc, String filenme,int key,int ep){
-        filenme=filenme+".txt";
+        filenme=filenme+"."+user;
         BufferedReader br;
         File file=new File(filenme);
-        Enc cons=new Enc();
         BigInteger bi,bep,bkey;
         try{
             if(file.exists()==false){
@@ -52,11 +53,27 @@ public class Enc {
        C=new int[size];
         for(int i=0; i<str.length;i=i+2){
             for(int j=0;j<arr.length;j++){
-                if(str[i]==arr[j]){
-                    first=(j+1);
+                if(str.length%2==0){
+                    if(str[i]==arr[j]){
+                        first=(j+1);
+                    }
+                    if(str[i+1]==arr[j]){
+                        sec=(j+1);
+                    }
                 }
-                if(str[i+1]==arr[j]){
-                    sec=(j+1);
+                else {
+                    if(str[i]==arr[j]){
+                        first=(j+1);
+                    }
+                    if(i<=str.length-2){
+                    if(str[i+1]==arr[j]){
+                        sec=(j+1);
+                    }
+                    }
+                    else{
+                        sec=0;
+                    }
+                    
                 }
             }
             if(sec<10)
@@ -64,6 +81,7 @@ public class Enc {
             else 
                 secstr=""+sec;
             M[k]=""+first+secstr;
+            System.out.println(M[k]);
 
             beg=Double.parseDouble(M[k]);
            bi= BigInteger.valueOf((int)beg);
@@ -71,7 +89,6 @@ public class Enc {
            bkey=BigInteger.valueOf(key);
             bi=bi.modPow(bep,bkey);
             C[k]=bi.intValue();
-                        System.out.println(C[k]);
             k=k+1;
         }
         
@@ -97,31 +114,9 @@ public class Enc {
              }catch(IOException e){
                  System.out.println("unable to read");
              }
-      
+        
+
     }
 
-    
-//    public int Publickey(int key, int ep){
-//        Enc call=new Enc();
-//        int prime,epmul=0, eppro=0,sub=-1,dkey;
-//        prime=key-1;
-//        while(sub!=0){
-//            while(eppro<=prime){
-//           epmul++;
-//           eppro=ep*epmul;
-//                System.out.println(epmul);
-//            }
-//            arrd.add(epmul-1);
-//            primearr.add(prime);
-//            eparr.add(ep);
-//            sub=prime-eppro+ep;
-//            prime=ep;
-//            ep=sub;
-//            epmul=0;
-//            eppro=0;
-//        }
-//        dkey= call.ExtendedEuclidean(prime, ep);
-//      return dkey;  
-//    }
 
 }

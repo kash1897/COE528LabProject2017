@@ -25,12 +25,18 @@ import java.util.Scanner;
  */
 public class Dec {
     ArrayList <String> Narr;
+    private String user;
+        public Dec(String user){
+        this.user=user;
+    }
     public void ModD(int key,int d,String filenme) {
         Narr=new ArrayList<>();
         Random r=new Random();
         BufferedReader br;
-        filenme=filenme+".txt";
+        filenme=filenme+"."+user;
+        String filede=filenme+"d";
         File file=new File(filenme);
+        File filedec=new File(filede);
         String decs,alphas="",fin="";
         String N;
         char[] arr={'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
@@ -39,16 +45,16 @@ public class Dec {
         int [] dec;
         BigInteger bd,bkey;
         BigInteger[] barr;
-       try{
+       try{       if(filedec.exists()!=true)
+                  filedec.createNewFile();
                   br=new BufferedReader(new FileReader(filenme));
                   BufferedWriter bw=new BufferedWriter(new FileWriter(filenme,true));
                   while((N=br.readLine()).equals("end")==false){
                       Narr.add(N);
-                      System.out.println(N);
                   }
                   br.close();
              }catch(FileNotFoundException e){
-                 System.out.println("not found");
+                 System.out.println("not found1");
              }catch(IOException e){
                  System.out.println("unable to read");
              }
@@ -66,33 +72,36 @@ public class Dec {
         for(int i=0;i<narrsize;i++){
             enc[i]=Integer.parseInt(Narr.get(i));
             barr[i]=BigInteger.valueOf(enc[i]);
+
             barr[i]=barr[i].modPow(bd, bkey);
+
             dec[i]=barr[i].intValue();
             decs=""+dec[i];
+            System.out.println(decs);
             for(int h=1;h<=26;h++){
-                
                 for(int j=1;j<=26;j++){
-                if(h<10&&j<10)
-                    alphas="0"+h+"0"+j;
-                else if(j<10)
+                 if(j<10)
                     alphas=h+"0"+j;
-                else if(h<10)
-                    alphas="0"+h+j;
                 else 
                     alphas=""+h+j;
                 if(alphas.equals(decs))
                     fin=fin+arr[h-1]+arr[j-1];
+                
                  
                 }
-                                  
+                if((h+"00").equals(decs))
+                     fin=fin+arr[h-1];             
             }
             
         }
             System.out.println(fin);
 
         try{
-                  br=new BufferedReader(new FileReader(filenme));
-                  BufferedWriter bw=new BufferedWriter(new FileWriter(filenme,true));
+
+                  br=new BufferedReader(new FileReader(filede));
+                  BufferedWriter bw=new BufferedWriter(new FileWriter(filede,true));
+                  bw.write(fin);
+                  bw.close();
                   br.close();
              }catch(FileNotFoundException e){
                  System.out.println("not found");
