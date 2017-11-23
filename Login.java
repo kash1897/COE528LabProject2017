@@ -1,7 +1,12 @@
-/*
+   /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
+ */
+
+/**
+ *
+ * @author Kobikan2
  */
 package coe528.project;
 import java.io.BufferedWriter;
@@ -48,7 +53,11 @@ public class Login {
         boolean logout = false; 
         BufferedWriter writer = null;
         BufferedReader reader = null;
+        BufferedReader br = null;
         Login main = new Login();
+        
+        int prime=0,e=0,d0=0;
+        KeyGen k=new KeyGen();
         
         try {
             File file = new File("User_Profiles.txt");
@@ -121,8 +130,11 @@ public class Login {
                             if(!login.Auth(u, "user")){
                                 System.out.println("\nEnter password: ");
                                 String p = sc.nextLine();
+                                prime= k.Findp();
+                                e=k.Finde(prime);
+                                d0=k.ExtendedEuclidean(prime,e);
                                 try{
-                                    writer.write("Username: " + u + " Password: " + p + " Key: \n");
+                                    writer.write("Username: " + u + " Password: " + p + " Key: "+prime+" e: "+e+" d0: "+d0+ "\n");
                                     writer.close();
                                     writer = new BufferedWriter(new FileWriter(login.file, true));
                                 }
@@ -190,14 +202,59 @@ public class Login {
             if(access.equals("User") || access.equals("user")){
                 do{
                     System.out.println("Select:\n1. Encryption\n2. Decryption\n3. Backup\n4. Logout");
-                    String uc = sc.nextLine();
-                
+                    String uc = sc.next();
+                    String check;       
+                    String code;
+                    Enc encrypt =new Enc();
+                    Dec decrypt =new Dec();
                     if(uc.equals("1")){
-                    
+                        System.out.println("Type the word you want to encypt");
+                        code=sc.next();
+                        try{
+                             br = new BufferedReader(new FileReader(login.file));
+                            
+                            while((check = br.readLine()) != null) {
+                                String[] wordLine = check.split(" ");
+                                for (int i=0;i<wordLine.length;i++) {
+                                    if(wordLine[i].equals("Key:"))
+                                        prime=Integer.parseInt(wordLine[i+1]);
+                                    if(wordLine[i].equals("e:"))
+                                        e=Integer.parseInt(wordLine[i+1]);
+                                }
+                            }   
+                            br.close();  
+                        }catch(FileNotFoundException ex) {
+                            System.out.println("\nUnable to open file.\n\n");                
+                        }
+                        catch(IOException ex) {
+                            System.out.println("\nError reading file.\n\n");
+                        }
+                        encrypt.ModE(code, username, prime, e);
                     }
                 
                     if(uc.equals("2")){
-                    
+                        try{
+                                br = new BufferedReader(new FileReader(login.file));
+
+                                while((check = br.readLine()) != null) {
+                                     String[] wordLine = check.split(" ");
+                                     for (int i=0;i<wordLine.length;i++) {
+                                         if(wordLine[i].equals("Key:"))
+                                        prime=Integer.parseInt(wordLine[i+1]);
+                                         if(wordLine[i].equals("d0:"))
+                                             d0=Integer.parseInt(wordLine[i+1]);
+                                         
+                                     }
+                                 }   
+                                 br.close();  
+                             }catch(FileNotFoundException ex) {
+                                 System.out.println("\nUnable to open file.\n\n");                
+                             }
+                             catch(IOException ex) {
+                                 System.out.println("\nError reading file.\n\n");
+                             }
+                        System.out.println(prime+""+d0+username);
+                        decrypt.ModD(prime, d0, username);
                     }
                 
                     if(uc.equals("3")){
