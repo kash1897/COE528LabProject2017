@@ -1,3 +1,5 @@
+package coe528.project;
+
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -7,6 +9,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -21,38 +24,84 @@ import java.util.Scanner;
  * @author Kobikan2
  */
 public class Dec {
-    public int ModD(int key,int d,String filenme) throws IOException{
+    ArrayList <String> Narr;
+    public void ModD(int key,int d,String filenme) {
+        Narr=new ArrayList<>();
+        Random r=new Random();
         BufferedReader br;
+        filenme=filenme+".txt";
         File file=new File(filenme);
-        Enc cons=new Enc();
-        BigInteger bi,bep,bkey;
-        if(file.exists()==false){
-            file.createNewFile();
-        }
-         int k=0,first=0,sec=0,size,end = 0,ep,s;
-         int [] C;
-         double beg;
-         Random r=new Random();
-
-        char[] arr={'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};        
-        try{
-                  if(file.exists()!=true)
-                  file.createNewFile();
+        String decs,alphas="",fin="";
+        String N;
+        char[] arr={'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
+        int narrsize;
+        int [] enc;
+        int [] dec;
+        BigInteger bd,bkey;
+        BigInteger[] barr;
+       try{
                   br=new BufferedReader(new FileReader(filenme));
                   BufferedWriter bw=new BufferedWriter(new FileWriter(filenme,true));
-                  Scanner check=new Scanner(filenme);
-                  while(check.hasNext()){
-                  s=Integer.parseInt(br.readLine());
+                  while((N=br.readLine()).equals("end")==false){
+                      Narr.add(N);
+                      System.out.println(N);
                   }
-
-                  
+                  br.close();
              }catch(FileNotFoundException e){
                  System.out.println("not found");
              }catch(IOException e){
                  System.out.println("unable to read");
              }
+        if(file.exists()==false){
+            System.out.println("File does not exist");
+        }
+        else{
+         bd=BigInteger.valueOf(d);
+         bkey=BigInteger.valueOf(key);
         
-        return cons.ExtendedEuclidean(key, ep);
+                narrsize=Narr.size();
+        enc= new int[narrsize];
+         dec= new int[narrsize];
+        barr= new BigInteger[narrsize];
+        for(int i=0;i<narrsize;i++){
+            enc[i]=Integer.parseInt(Narr.get(i));
+            barr[i]=BigInteger.valueOf(enc[i]);
+            barr[i]=barr[i].modPow(bd, bkey);
+            dec[i]=barr[i].intValue();
+            decs=""+dec[i];
+            for(int h=1;h<=26;h++){
+                
+                for(int j=1;j<=26;j++){
+                if(h<10&&j<10)
+                    alphas="0"+h+"0"+j;
+                else if(j<10)
+                    alphas=h+"0"+j;
+                else if(h<10)
+                    alphas="0"+h+j;
+                else 
+                    alphas=""+h+j;
+                if(alphas.equals(decs))
+                    fin=fin+arr[h-1]+arr[j-1];
+                 
+                }
+                                  
+            }
+            
+        }
+            System.out.println(fin);
+
+        try{
+                  br=new BufferedReader(new FileReader(filenme));
+                  BufferedWriter bw=new BufferedWriter(new FileWriter(filenme,true));
+                  br.close();
+             }catch(FileNotFoundException e){
+                 System.out.println("not found");
+             }catch(IOException e){
+                 System.out.println("unable to read");
+             }
+
+        
+    }
     }
     
 }

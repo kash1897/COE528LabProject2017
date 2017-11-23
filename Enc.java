@@ -1,3 +1,5 @@
+package coe528.project;
+
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -24,23 +26,27 @@ public class Enc {
             ArrayList <Integer> arrd=new ArrayList<>();
         ArrayList <Integer> primearr=new ArrayList<>();
         ArrayList <Integer> eparr=new ArrayList<>(); 
-    public int ModE(String bfrenc, String filenme,int key) throws IOException{
+    public void ModE(String bfrenc, String filenme,int key,int ep){
+        filenme=filenme+".txt";
         BufferedReader br;
         File file=new File(filenme);
         Enc cons=new Enc();
         BigInteger bi,bep,bkey;
-        if(file.exists()==false){
-            file.createNewFile();
-        }
-         int k=0,first=0,sec=0,size,end = 0,ep;
+        try{
+            if(file.exists()==false){
+                file.createNewFile();
+            }
+            }catch(IOException ex) {
+                System.out.println("\nError reading file.\n\n");
+            }
+         int k=0,first=0,sec=0,size,end = 0;
          int [] C;
          double beg;
          Random r=new Random();
         char[] arr={'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
         char[] str=bfrenc.toCharArray();
         String[] M;
-        String firststr,secstr;
-        ep= cons.GCD(key);  
+        String firststr,secstr; 
        size=str.length/2 +1;
        M=new String[size];
        C=new int[size];
@@ -58,12 +64,14 @@ public class Enc {
             else 
                 secstr=""+sec;
             M[k]=""+first+secstr;
+
             beg=Double.parseDouble(M[k]);
            bi= BigInteger.valueOf((int)beg);
            bep=BigInteger.valueOf(ep);
            bkey=BigInteger.valueOf(key);
             bi=bi.modPow(bep,bkey);
             C[k]=bi.intValue();
+                        System.out.println(C[k]);
             k=k+1;
         }
         
@@ -72,70 +80,48 @@ public class Enc {
                   file.createNewFile();
                   br=new BufferedReader(new FileReader(filenme));
                   BufferedWriter bw=new BufferedWriter(new FileWriter(filenme,true));
-                  for(int i=0;i<=k;i++){
-                      bw.write(C[i]);
+                  for(int i=0;i<k;i++){
+                      if(C[i]<100){
+                        bw.write("00"+C[i]+"\n");  
+                      }
+                      else if(C[i]<1000){
+                        bw.write("0"+C[i]+"\n");  
+                      }
+                      else
+                      bw.write(C[i]+"\n");
                   }
-                  
+                  bw.write("end\n");
                   bw.close();
              }catch(FileNotFoundException e){
                  System.out.println("not found");
              }catch(IOException e){
                  System.out.println("unable to read");
              }
-        
-        return cons.ExtendedEuclidean(key, ep);
+      
     }
-    public int GCD(int key){
-        Random r=new Random();
-        int ep=0,cd=0;
-        BigInteger k,biep,GCD;
-        boolean valid=true;
-        k=BigInteger.valueOf(key-1);
-        while(valid){
-            ep=r.nextInt(key-1);
-            biep=BigInteger.valueOf(ep);
-            GCD=k.gcd(biep);
-            cd=GCD.intValue();
-            if(cd==1)
-                valid=false;
-        }
-        return ep;
-    }
-    
-    public int Publickey(int key, int ep){
-        Enc call=new Enc();
-        int prime,epmul=0, eppro=0,sub=-1,dkey;
-        prime=key-1;
-        while(sub!=0){
-            while(eppro<=prime){
-           epmul++;
-           eppro=ep*epmul;
-                System.out.println(epmul);
-            }
-            arrd.add(epmul-1);
-            primearr.add(prime);
-            eparr.add(ep);
-            sub=prime-eppro+ep;
-            prime=ep;
-            ep=sub;
-            epmul=0;
-            eppro=0;
-        }
-        dkey= call.ExtendedEuclidean(prime, ep);
-      return dkey;  
-    }
-    public int ExtendedEuclidean(int prime, int ep){
-        int x=0,y=0;
-        Enc e=new Enc();
-           for(int i=-10000;i<5000;i++){
-               for(int j=-10000;j<5000;j++){
-                   x=j*prime+ep*i;
-               if(x==1){
-                  y=i;
-               }
-           }
 
-           }
-           return y;
-    }
+    
+//    public int Publickey(int key, int ep){
+//        Enc call=new Enc();
+//        int prime,epmul=0, eppro=0,sub=-1,dkey;
+//        prime=key-1;
+//        while(sub!=0){
+//            while(eppro<=prime){
+//           epmul++;
+//           eppro=ep*epmul;
+//                System.out.println(epmul);
+//            }
+//            arrd.add(epmul-1);
+//            primearr.add(prime);
+//            eparr.add(ep);
+//            sub=prime-eppro+ep;
+//            prime=ep;
+//            ep=sub;
+//            epmul=0;
+//            eppro=0;
+//        }
+//        dkey= call.ExtendedEuclidean(prime, ep);
+//      return dkey;  
+//    }
+
 }
