@@ -1,6 +1,6 @@
 package coe528.project;
 
-
+//imports
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -23,16 +23,20 @@ import java.util.ArrayList;
  * @author Kobikan2
  */
 public class Enc {
+    //private instance variables
     private String user;
+    //Constructor that holds the username of the user
     public Enc(String user){
         this.user=user;
     }
-
+//Encryption Algorithim
     public void ModE(String bfrenc, String filenme,int key,int ep){
+        //Cretes the file name with the ending prefix being the users username
         filenme=filenme+"."+user;
         BufferedReader br;
         File file=new File(filenme);
         BigInteger bi,bep,bkey;
+        //File creation if the file does not exist
         try{
             if(file.exists()==false){
                 file.createNewFile();

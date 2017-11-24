@@ -50,20 +50,26 @@ public class Login {
     
     
     public static void main(String[] args){
+        //initialized variables
         boolean logout = false; 
         BufferedWriter writer = null;
         BufferedReader reader = null;
         BufferedReader br = null;
         Login main = new Login();
-        
-        int prime=0,e=0,d0=0;
-        KeyGen k=new KeyGen();
-        
+        String filetle="";
+        int prime=0,e=0;
+        //initialized method calling
+        Findp modp=new Findp();
+        Finde mode=new Finde();
+        Findd modd;
         try {
+            //Creastes User text file to hold login information
             File file = new File("User_Profiles.txt");
+            //If file does not exists then it creates it
             if (!file.exists()) {
                 file.createNewFile();
             }
+            //
             writer = new BufferedWriter(new FileWriter(file, true));
             if(!main.Auth("admin", "user")){
                 writer.write("Username: admin Password: pass\n");
@@ -130,11 +136,10 @@ public class Login {
                             if(!login.Auth(u, "user")){
                                 System.out.println("\nEnter password: ");
                                 String p = sc.nextLine();
-                                prime= k.Findp();
-                                e=k.Finde(prime);
-                                d0=k.ExtendedEuclidean(prime,e);
+                                prime= modp.Findp();
+                                e=mode.Finde(prime);
                                 try{
-                                    writer.write("Username: " + u + " Password: " + p + " Key: "+prime+" e: "+e+" d0: "+d0+ "\n");
+                                    writer.write("Username: " + u + " Password: " + p + " Key: "+prime+" e: "+e+ "\n");
                                     writer.close();
                                     writer = new BufferedWriter(new FileWriter(login.file, true));
                                 }
@@ -205,8 +210,9 @@ public class Login {
                     String uc = sc.next();
                     String check;       
                     String code;
-                    Enc encrypt =new Enc();
-                    Dec decrypt =new Dec();
+                    boolean valid=false;
+                    Enc encrypt =new Enc(username);
+
                     if(uc.equals("1")){
                         System.out.println("Type the word you want to encypt");
                         code=sc.next();
@@ -229,10 +235,24 @@ public class Login {
                         catch(IOException ex) {
                             System.out.println("\nError reading file.\n\n");
                         }
-                        encrypt.ModE(code, username, prime, e);
+                        System.out.println("What file do you want it to be stored under?");
+                        while(valid==false){
+                        filetle=sc.next();
+                        File test=new File(filetle+"."+username);
+                        File testdec=new File(filetle+"."+username+"d");
+                        if(test.exists()==false)
+                            valid=true;
+                        else if (testdec.exists()==false)
+                            valid=true;
+                        else
+                                System.out.println("Enter another name");
+                        }
+                        encrypt.ModE(code, filetle, prime, e);
                     }
                 
                     if(uc.equals("2")){
+                        Dec decrypt;
+                        
                         try{
                                 br = new BufferedReader(new FileReader(login.file));
 
@@ -241,9 +261,12 @@ public class Login {
                                      for (int i=0;i<wordLine.length;i++) {
                                          if(wordLine[i].equals("Key:"))
                                         prime=Integer.parseInt(wordLine[i+1]);
-                                         if(wordLine[i].equals("d0:"))
-                                             d0=Integer.parseInt(wordLine[i+1]);
-                                         
+                                         if(wordLine[i].equals("e:"))
+                                        e=Integer.parseInt(wordLine[i+1]);
+//                                         System.out.println(prime);
+//                                         if(wordLine[i].equals("d0:"))
+//                                             d0=Integer.parseInt(wordLine[i+1]);
+//                                         System.out.println(d0);
                                      }
                                  }   
                                  br.close();  
@@ -253,8 +276,11 @@ public class Login {
                              catch(IOException ex) {
                                  System.out.println("\nError reading file.\n\n");
                              }
-                        System.out.println(prime+""+d0+username);
-                        decrypt.ModD(prime, d0, username);
+                        modd=new Findd(prime,e);
+                        decrypt=new Dec(username);
+                        System.out.println("what is the file you want to decrypt");
+                        filetle=sc.next();
+                        decrypt.ModD(prime,modd.ExtendedEuclidean(), filetle);
                     }
                 
                     if(uc.equals("3")){
