@@ -1,12 +1,7 @@
-   /*
+/*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
- */
-
-/**
- *
- * @author Kobikan2
  */
 package coe528.project;
 import java.io.BufferedWriter;
@@ -20,23 +15,47 @@ import java.io.*;
  * @author kashyappandya
  */
 public class Login {
-    public String file = "User_Profiles.txt";
-    
+    private String file = "User_Profiles.txt";
+    private static int count = 0;
+            
     public boolean Auth(String x, String select){
-        String line = null;
-        
         try {
+            String line = null;
+            int keepCount = 0;
             FileReader Reader = new FileReader(file);
             BufferedReader writer = new BufferedReader(Reader);
+            keepCount = 0;
             
-            while((line = writer.readLine()) != null) {
-                String[] wordLine = line.split(" ");
-                for (String word : wordLine) {
-                    if (x.equals(word)){
-                        return true;
+            if(select.equals("user")){
+                while((line = writer.readLine()) != null) {
+                    String[] wordLine = line.split(" ");
+                    for (String word : wordLine){
+                        if (x.equals(word)){
+                            writer.close();
+                            count = keepCount;
+                            //System.out.println("\n\n\njh" + count);
+                            return true;
+                        }
                     }
-                }
-            }   
+                    keepCount++;
+                } 
+            }
+            
+            else{
+                while((line = writer.readLine()) != null){
+                    String[] wordLine = line.split(" ");
+                    for(String word: wordLine){
+                        if(keepCount == count){
+                            if(x.equals(word)){
+                                writer.close();
+                                return true;
+                            }  
+                        }
+                    }
+                    keepCount++;
+                } 
+            }
+              
             writer.close();         
         }
         catch(FileNotFoundException ex) {
@@ -50,29 +69,29 @@ public class Login {
     
     
     public static void main(String[] args){
-        //initialized variables
         boolean logout = false; 
         BufferedWriter writer = null;
         BufferedReader reader = null;
         BufferedReader br = null;
         Login main = new Login();
-        String filetle="";
-        int prime=0,e=0;
+        
+        String filetle = "";
+        int prime = 0,e = 0;
         //initialized method calling
-        Findp modp=new Findp();
-        Finde mode=new Finde();
+        Findp modp = new Findp();
+        Finde mode = new Finde();
         Findd modd;
+        
         try {
-            //Creastes User text file to hold login information
+            //Creates User text file to hold login information
             File file = new File("User_Profiles.txt");
             //If file does not exists then it creates it
             if (!file.exists()) {
                 file.createNewFile();
             }
-            //
             writer = new BufferedWriter(new FileWriter(file, true));
             if(!main.Auth("admin", "user")){
-                writer.write("Username: admin Password: pass\n");
+                writer.write("Username: admin Password: pass Hash: " + (new Hash().getHashMD5("pass")) + "\n");
             }
             writer.close();
             writer = new BufferedWriter(new FileWriter(file, true));
@@ -84,6 +103,7 @@ public class Login {
         do{
             Scanner sc = new Scanner(System.in);
             Login login = new Login();
+            Hash securityKey = new Hash();
             
             System.out.println("Welcome to XYZ Encryption/Decryption and Backup Tool.\n");
             
@@ -92,6 +112,7 @@ public class Login {
             if(access.equals("")){
                 break;
             }
+            
             while(!(access.equals("Administrator") || access.equals("administrator") || access.equals("User") || access.equals("user"))){
                 System.out.println("\nPlease enter appropriate access level:");
                 access = sc.nextLine();
@@ -99,11 +120,18 @@ public class Login {
             
             System.out.println("\nUsername:");
             String username = sc.nextLine();
-            if(!username.equals("admin")){
+            if(!username.equals("")){
                 do{
+                    if(username.equals("admin")){
+                        if(!login.Auth(username, "user")){
+                            System.out.println("Login denied. Username or Password does not exist.");
+                            System.out.println("\nUsername: ");
+                            username = sc.nextLine();
+                        }
+                    }
                     if(!username.equals("admin")){
                         if(!login.Auth(username, "user")){
-                            System.out.println("Login denied. Username does not exist.");
+                            System.out.println("Login denied. Username or Password does not exist.");
                             System.out.println("\nUsername: ");
                             username = sc.nextLine();
                         }
@@ -114,21 +142,26 @@ public class Login {
             
             System.out.println("\nPassword:");
             String password = sc.nextLine();
-            if(!password.equals("admin") || !password.equals(" ")){
-                do{
-                    if(!login.Auth(password, "pass")){
-                        System.out.println("Login denied. Password does not match.");
-                        System.out.println("\nPassword:");
-                        password = sc.nextLine();
+            if(!password.equals("pass") || !password.equals("")){
+                String hash = securityKey.getHashMD5(password);
+                if(!login.Auth(hash, "password")){
+                    do{
+                        if(!login.Auth(hash, "pass")){
+                            System.out.println("Login denied. Username or Password does not match.");
+                            System.out.println("\nPassword:");
+                            hash = sc.nextLine();
+                        }
                     }
+                    while(!login.Auth(hash, "password"));
                 }
-                while(!login.Auth(password, "pass"));
             }
             
             if(access.equals("Administrator") || access.equals("administrator")){
                 do{
                     System.out.println("\nSelect:\n1. Add Profile\n2. Remove Profile\n3. Logout");
                     String ad1 = sc.nextLine();
+                    logout = false;
+      
                     if(ad1.equals("1")){
                         System.out.println("\nEnter username: ");
                         String u = sc.nextLine();
@@ -136,10 +169,15 @@ public class Login {
                             if(!login.Auth(u, "user")){
                                 System.out.println("\nEnter password: ");
                                 String p = sc.nextLine();
-                                prime= modp.Findp();
-                                e=mode.Finde(prime);
+                              
+                                prime = modp.Findp();
+                                e = mode.Finde(prime);
+                                
+                                String gotHash = null;
+                                gotHash = securityKey.getHashMD5(p);
+                                
                                 try{
-                                    writer.write("Username: " + u + " Password: " + p + " Key: "+prime+" e: "+e+ "\n");
+                                    writer.write("Username: " + u + " Password: " + p + " Key: " + prime +" e: " + e + " Hash: " + gotHash + "\n");
                                     writer.close();
                                     writer = new BufferedWriter(new FileWriter(login.file, true));
                                 }
@@ -206,16 +244,18 @@ public class Login {
             
             if(access.equals("User") || access.equals("user")){
                 do{
-                    System.out.println("Select:\n1. Encryption\n2. Decryption\n3. Backup\n4. Logout");
-                    String uc = sc.next();
+                    logout = false;
+                    System.out.println("\nSelect:\n1. Encryption\n2. Decryption\n3. Backup\n4. Logout");
+                    String uc = sc.nextLine();
+                    
                     String check;       
                     String code;
                     boolean valid=false;
                     Enc encrypt =new Enc(username);
-
+                    
                     if(uc.equals("1")){
                         System.out.println("Type the word you want to encypt");
-                        code=sc.next();
+                        code = sc.next();
                         try{
                              br = new BufferedReader(new FileReader(login.file));
                             
@@ -289,11 +329,11 @@ public class Login {
                         Backup sign = new Backup();
                         sign.backupAlgorithm(f);
                     }
-                
-                   if(uc.equals("4")){
-                       logout = true;
-                       System.out.println("\nLogout successful.");
-                   }
+                    
+                    if(uc.equals("4")){
+                        logout = true;
+                        System.out.println("\nLogout successful.");
+                    }
                 }
                 while(logout !=true);  
             }
@@ -308,7 +348,6 @@ public class Login {
         catch (IOException ioe) {
             ioe.printStackTrace();
         }
-        
         System.out.println("\nThank you for using the tool.");   
     }  
 }
