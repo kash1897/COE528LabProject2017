@@ -76,12 +76,14 @@ public class Login {
         Login main = new Login();
         
         String filetle = "";
-        int prime = 0,e = 0;
+        int prime = 0,e = 0,phi=0,n=0,e2=0;
         //initialized method calling
-        Findp modp = new Findp();
-        Finde mode = new Finde();
-        Findd modd;
-        
+//        Findp modp = new Findp();
+//        Finde mode = new Finde();
+//        Findd modd;
+EncDec init;
+EncDec algo;
+         Findphi modphi = new Findphi();
         try {
             //Creates User text file to hold login information
             File file = new File("User_Profiles.txt");
@@ -169,15 +171,18 @@ public class Login {
                             if(!login.Auth(u, "user")){
                                 System.out.println("\nEnter password: ");
                                 String p = sc.nextLine();
-                              
-                                prime = modp.Findp();
-                                e = mode.Finde(prime);
+                                init=new RSA(username);
+                                prime = init.Findp();
+                                e = init.Finde(prime);
+                                phi=modphi.Find();
+                                n=modphi.n;
+                                e2=init.Finde(phi);
                                 
                                 String gotHash = null;
                                 gotHash = securityKey.getHashMD5(p);
                                 
                                 try{
-                                    writer.write("Username: " + u + " Password: " + p + " Key: " + prime +" e: " + e + " Hash: " + gotHash + "\n");
+                                    writer.write("Username: " + u + " Password: " + p + " Key: " + prime +" e: " + e +" phi: "+phi+" n: "+n+" e2: "+e2+ " Hash: " + gotHash + "\n");
                                     writer.close();
                                     writer = new BufferedWriter(new FileWriter(login.file, true));
                                 }
@@ -250,23 +255,73 @@ public class Login {
                     
                     String check;       
                     String code;
+                    String type;
                     boolean valid=false;
-                    Enc encrypt =new Enc(username);
-                    
+//                    Enc encrypt =new Enc(username);
+
                     if(uc.equals("1")){
+                        System.out.println("Which method would you like to use, RSA or Modular(Mod)");
+                        type=sc.nextLine();
+                        if(type.equalsIgnoreCase("mod")){
+                            algo=new Modular(username);
                         System.out.println("Type the word you want to encypt");
+                        code = sc.nextLine();
+                        try{
+                             br = new BufferedReader(new FileReader(login.file));
+                            
+                            while((check = br.readLine()) != null) {
+                                if(check.contains(username)){
+                                String[] wordLine = check.split(" ");
+                                for (int i=0;i<wordLine.length;i++) {
+                                    if(wordLine[i].equals("Key:"))
+                                        prime=Integer.parseInt(wordLine[i+1]);
+                                    System.out.println(prime);
+                                    if(wordLine[i].equals("e:"))
+                                        e=Integer.parseInt(wordLine[i+1]);
+                                }
+                            }
+                            }   
+                            br.close();  
+                        }catch(FileNotFoundException ex) {
+                            System.out.println("\nUnable to open file.\n\n");                
+                        }
+                        catch(IOException ex) {
+                            System.out.println("\nError reading file.\n\n");
+                        }
+                        System.out.println("What file do you want it to be stored under?");
+                        while(valid==false){
+                        filetle=sc.nextLine();
+                        File test=new File(filetle+"."+username);
+                        File testdec=new File(filetle+"."+username+"d");
+                        if(test.exists()==false)
+                            valid=true;
+                        else if (testdec.exists()==false)
+                            valid=true;
+                        else
+                                System.out.println("Enter another name");
+                        }
+                        algo.Enc(code, filetle, prime, e);
+                        }
+                        else if(type.equalsIgnoreCase("rsa")){
+                            algo=new RSA(username);
+                            System.out.println("Type the word you want to encypt");
                         code = sc.next();
                         try{
                              br = new BufferedReader(new FileReader(login.file));
                             
                             while((check = br.readLine()) != null) {
+                                 if(check.contains(username)){
                                 String[] wordLine = check.split(" ");
                                 for (int i=0;i<wordLine.length;i++) {
-                                    if(wordLine[i].equals("Key:"))
-                                        prime=Integer.parseInt(wordLine[i+1]);
-                                    if(wordLine[i].equals("e:"))
-                                        e=Integer.parseInt(wordLine[i+1]);
+                                    if(wordLine[i].equals("phi:"))
+                                        phi=Integer.parseInt(wordLine[i+1]);
+                                    if(wordLine[i].equals("n:"))
+                                        n=Integer.parseInt(wordLine[i+1]);
+                                    if(wordLine[i].equals("e2:"))
+                                        e2=Integer.parseInt(wordLine[i+1]);
+                                    System.out.println(e2);
                                 }
+                                 }
                             }   
                             br.close();  
                         }catch(FileNotFoundException ex) {
@@ -287,13 +342,19 @@ public class Login {
                         else
                                 System.out.println("Enter another name");
                         }
-                        encrypt.ModE(code, filetle, prime, e);
+                        algo.Enc(code, filetle, n, e);
+                        }
                     }
                 
                     if(uc.equals("2")){
-                        Dec decrypt;
-                        
-                        try{
+                        System.out.println("what is the file you want to decrypt");
+                        filetle=sc.nextLine();
+                        String filetlem=filetle+".mod."+username;
+                        String filetler=filetle+".rsa."+username;;
+                        File temp=new File(filetlem);
+                        File tempr=new File(filetler);
+                        if(temp.exists()){
+                            try{
                                 br = new BufferedReader(new FileReader(login.file));
 
                                 while((check = br.readLine()) != null) {
@@ -316,13 +377,38 @@ public class Login {
                              catch(IOException ex) {
                                  System.out.println("\nError reading file.\n\n");
                              }
-                        modd=new Findd(prime,e);
-                        decrypt=new Dec(username);
-                        System.out.println("what is the file you want to decrypt");
-                        filetle=sc.next();
-                        decrypt.ModD(prime,modd.ExtendedEuclidean(), filetle);
+                        algo=new Modular(username);
+                       
+                        algo.Dec(prime,algo.ExtendedEuclidean(prime,e), filetle);
+                        }
+                        else if(tempr.exists()){
+                            try{
+                                br = new BufferedReader(new FileReader(login.file));
+
+                                while((check = br.readLine()) != null) {
+                                     String[] wordLine = check.split(" ");
+                                     for (int i=0;i<wordLine.length;i++) {
+                                         if(wordLine[i].equals("phi:"))
+                                        phi=Integer.parseInt(wordLine[i+1]);
+                                         if(wordLine[i].equals("e2:"))
+                                        e2=Integer.parseInt(wordLine[i+1]);
+                                         if(wordLine[i].equals("n:"))
+                                             n=Integer.parseInt(wordLine[i+1]);
+                                     }
+                                 }   
+                                 br.close();  
+                             }catch(FileNotFoundException ex) {
+                                 System.out.println("\nUnable to open file.\n\n");                
+                             }
+                             catch(IOException ex) {
+                                 System.out.println("\nError reading file.\n\n");
+                             }
+                        algo=new RSA(username);
+                        
+                        algo.Dec(prime,algo.ExtendedEuclidean(n,e2), filetle);
+                        
                     }
-                
+                    }
                     if(uc.equals("3")){
                         System.out.println("\nBackup Facility.\nPlease enter the path, name, and extension of the file you wish to backup.");
                         String f = sc.nextLine();
